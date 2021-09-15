@@ -1,0 +1,41 @@
+---
+title: 'Team 1: '
+author: "Kaiyu Wang,,,,,"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Setup
+```{r}
+library(readr)
+library(data.table)
+library(ggplot2)
+CHD_raw <-read_csv("frmgham.csv")
+```
+## Clean Data
+```{r}
+CHD <- subset(CHD_raw, select = c(AGE,SEX,CURSMOKE,CIGPDAY,BPMEDS,PREVSTRK,PREVHYP,DIABETES,TOTCHOL,SYSBP,DIABP,BMI,HEARTRTE,GLUCOSE,PREVAP,PREVCHD))
+CHD<-na.omit(CHD)
+```
+## EDA
+```{r}
+common_theme <- theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+ggplot(data = CHD, aes(x = factor(PREVCHD), 
+                          y = prop.table(stat(count)), fill = factor(PREVCHD),
+                          label = scales::percent(prop.table(stat(count))))) +
+    geom_bar(position = "dodge") + 
+    geom_text(stat = 'count',
+              position = position_dodge(.9), 
+              vjust = -0.5, 
+              size = 3) + 
+    scale_x_discrete(labels = c("No CHD", "CHD"))+
+    scale_y_continuous(labels = scales::percent)+
+    labs(x = 'Class', y = 'Percentage') +
+    ggtitle("Distribution of Class Labels") +
+    common_theme
+```
