@@ -14,30 +14,29 @@ knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(data.table)
 library(ggplot2)
-CHD_raw <-read_csv("frmgham.csv")
+CHD_raw <-read_csv("framingham.csv")
 ```
 ## Clean Data
 ```{r}
-CHD <- subset(CHD_raw, select = c(AGE,SEX,CURSMOKE,CIGPDAY,BPMEDS,PREVSTRK,PREVHYP,DIABETES,TOTCHOL,SYSBP,DIABP,BMI,HEARTRTE,GLUCOSE,PREVAP,PREVCHD))
-CHD<-na.omit(CHD)
+CHD<-na.omit(CHD_raw)
 ```
 ## EDA
 ```{r}
 common_theme <- theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
-ggplot(data = CHD, aes(x = factor(PREVCHD), 
+ggplot(data = CHD, aes(x = factor(TenYearCHD), 
                           y = prop.table(stat(count)), 
-                          fill = factor(PREVCHD),
+                          fill = factor(TenYearCHD),
                           label = scales::percent(prop.table(stat(count))))) +
     geom_bar(position = "dodge") + 
     geom_text(stat = 'count',
               position = position_dodge(.9), 
               vjust = -0.5, 
               size = 3) + 
-    scale_x_discrete(labels = c("No CHD", "CHD"))+
+    scale_x_discrete(labels = c("no risk", "risk"))+
     scale_y_continuous(labels = scales::percent)+
     labs(x = 'Class', y = 'Percentage') +
-    ggtitle("Distribution of Class Labels") +
+    ggtitle("Distribution of ten year risk of CHD") +
     common_theme
 ```
 ```{r}
@@ -45,28 +44,34 @@ summary(CHD)
 sapply(CHD, class)
 ```
 ```{r}
-CHD_1 <- CHD[ CHD$PREVCHD=='1',]
-ggplot(CHD_1, aes(x=AGE)) +           
+CHD_1 <- CHD[ CHD$TenYearCHD=='1',]
+ggplot(CHD_1, aes(x=age)) +           
   geom_histogram(position='dodge2',
-                 breaks=seq(30, 80, by=5),
+                 breaks=seq(30, 70, by=5),
                  aes(fill=..count..)
                  )+
     scale_fill_gradient("Count", low="yellow", high="red")+
   common_theme
 ```
+```{r}
+count1 <- length(which(CHD$TenYearCHD == 1))
+count1
+count2 <- length(which(CHD$TenYearCHD == 0))
+count2
+```
 
 
 ```{r}
-ggplot(data = CHD, aes(x = factor(AGE), 
+ggplot(data = CHD_1, aes(x = factor(currentSmoker), 
                           y = prop.table(stat(count)), 
-                          fill = factor(AGE),
+                          fill = factor(currentSmoker),
                           label = scales::percent(prop.table(stat(count))))) +
     geom_bar(position = "dodge") + 
     geom_text(stat = 'count',
               position = position_dodge(.9), 
               vjust = -0.5, 
               size = 3) + 
-  #  scale_x_discrete(labels = c("No CHD", "CHD"))+
+    scale_x_discrete(labels = c("No Smoke", "Smoke"))+
     scale_y_continuous(labels = scales::percent)+
     labs(x = 'Class', y = 'Percentage') +
     ggtitle("Distribution of Class Labels") +
