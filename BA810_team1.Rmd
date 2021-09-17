@@ -1,6 +1,6 @@
 ---
 title: 'Team 1: '
-author: "Kaiyu Wang,,,,,"
+author: "Kaiyu Wang,Chinar,,,,"
 output:
   html_document:
     df_print: paged
@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Setup
 ```{r}
+install.packages('readr', dependencies = TRUE, repos='http://cran.rstudio.com/')
 library(readr)
 library(data.table)
 library(ggplot2)
@@ -19,6 +20,7 @@ CHD_raw <-read_csv("framingham.csv")
 ## Clean Data
 ```{r}
 CHD<-na.omit(CHD_raw)
+colnames(CHD)[1] <- 'is_male'
 ```
 ## EDA
 ```{r}
@@ -77,3 +79,14 @@ ggplot(data = CHD_1, aes(x = factor(currentSmoker),
     ggtitle("Distribution of Class Labels") +
     common_theme
 ```
+
+
+```{r}
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+CHD_1$is_male[CHD_1$is_male == 0] <- "female"
+CHD_1$is_male[CHD_1$is_male == 1] <- "male"
+ggplot(data=CHD_1,aes(age,fill=is_male))+
+  geom_bar(position = position_dodge(width = 0.5))+
+  scale_fill_brewer(palette=cbPalette)
+```
+
