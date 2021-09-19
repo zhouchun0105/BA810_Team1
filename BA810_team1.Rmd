@@ -76,7 +76,7 @@ ggplot(data = CHD_1, aes(x = factor(currentSmoker),
     scale_x_discrete(labels = c("No Smoke", "Smoke"))+
     scale_y_continuous(labels = scales::percent)+
     labs(x = 'Class', y = 'Percentage') +
-    ggtitle("Distribution of Class Labels") +
+    ggtitle("Distribution of CHD") +
     common_theme
 ```
 
@@ -87,6 +87,7 @@ CHD_1$is_male[CHD_1$is_male == 0] <- "female"
 CHD_1$is_male[CHD_1$is_male == 1] <- "male"
 ggplot(data=CHD_1,aes(age,fill=is_male))+
   geom_bar(position = position_dodge(width = 0.5))+
-  scale_fill_brewer(palette=cbPalette)
+  scale_fill_brewer(palette=cbPalette)+
+  labs(x = "Age in years",y = "CHD count")+
+  ggtitle("Distribution of CHD with age and gender")
 ```
-
