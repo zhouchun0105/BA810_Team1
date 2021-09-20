@@ -1,0 +1,6 @@
+```{r}
+a <- CHD[,c(1,3,5,7,9,11,13,15)]
+pairs(a, col = "coral",main = "Pairwise Correlation Analysis")
+
+
+```
