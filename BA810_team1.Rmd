@@ -100,3 +100,10 @@ labs(x='Age Group',y='Percentage',color='Gender' )+
 ggtitle("Distribution of Percentage of CHD with Age and Gender")+
 common_theme
 ```
+
+```{r}
+a <- CHD[,c(1,3,5,7,9,11,13,15)]
+pairs(a, col = "coral",main = "Pairwise Correlation Analysis")
+
+
+```
