@@ -15,6 +15,7 @@ install.packages('readr', dependencies = TRUE, repos='http://cran.rstudio.com/')
 library(readr)
 library(data.table)
 library(ggplot2)
+library(dplyr)
 CHD_raw <-read_csv("framingham.csv")
 ```
 ## Clean Data
@@ -23,6 +24,12 @@ CHD<-na.omit(CHD_raw)
 colnames(CHD)[1] <- 'is_male'
 ```
 ## EDA
+```{r}
+count1 <- length(which(CHD$TenYearCHD == 1))
+count1
+count2 <- length(which(CHD$TenYearCHD == 0))
+count2
+```
 ```{r}
 common_theme <- theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
@@ -37,57 +44,59 @@ ggplot(data = CHD, aes(x = factor(TenYearCHD),
               size = 3) + 
     scale_x_discrete(labels = c("no risk", "risk"))+
     scale_y_continuous(labels = scales::percent)+
-    labs(x = 'Class', y = 'Percentage') +
-    ggtitle("Distribution of ten year risk of CHD") +
+    labs(x = 'Disease Prevalence', y = 'Percentage',fill='TenYearCHD') +
+    ggtitle("Distribution of Ten Year Risk of CHD") +
     common_theme
 ```
 ```{r}
-summary(CHD)
+#summary(CHD)
 sapply(CHD, class)
 ```
 ```{r}
+CHD$agec <- 
+  cut(CHD$age, breaks = c(30,35,40,45,50,55,60,65,70),
+      labels = c("30-35","35-40","40-45","45-50","50-55","55-60","60-65","65-70"))
+  
+d <- CHD %>% group_by(agec) %>% summarise(perc = mean(TenYearCHD=='1'))
+d$perc_r <- round(d$perc,2)*100
+d$perc_r <- interaction(d$perc_r, "%", sep = "")
+d
+
+ggplot(d,aes(x=agec,y=perc)) + 
+geom_col()+
+scale_y_continuous(labels=scales::percent)+
+geom_text(aes(label = perc_r), vjust = -0.5)+
+labs(x='Age Group',y='Percentage')+
+ggtitle("Distribution of Percentage of CHD with Age")+
+common_theme
+```
+
+
+
+
+```{r}
+#cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", #"#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 CHD_1 <- CHD[ CHD$TenYearCHD=='1',]
-ggplot(CHD_1, aes(x=age)) +           
-  geom_histogram(position='dodge2',
-                 breaks=seq(30, 70, by=5),
-                 aes(fill=..count..)
-                 )+
-    scale_fill_gradient("Count", low="yellow", high="red")+
-  common_theme
-```
-```{r}
-count1 <- length(which(CHD$TenYearCHD == 1))
-count1
-count2 <- length(which(CHD$TenYearCHD == 0))
-count2
-```
-
-
-```{r}
-ggplot(data = CHD_1, aes(x = factor(currentSmoker), 
-                          y = prop.table(stat(count)), 
-                          fill = factor(currentSmoker),
-                          label = scales::percent(prop.table(stat(count))))) +
-    geom_bar(position = "dodge") + 
-    geom_text(stat = 'count',
-              position = position_dodge(.9), 
-              vjust = -0.5, 
-              size = 3) + 
-    scale_x_discrete(labels = c("No Smoke", "Smoke"))+
-    scale_y_continuous(labels = scales::percent)+
-    labs(x = 'Class', y = 'Percentage') +
-    ggtitle("Distribution of CHD") +
-    common_theme
-```
-
-
-```{r}
-cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 CHD_1$is_male[CHD_1$is_male == 0] <- "female"
 CHD_1$is_male[CHD_1$is_male == 1] <- "male"
 ggplot(data=CHD_1,aes(age,fill=is_male))+
   geom_bar(position = position_dodge(width = 0.5))+
-  scale_fill_brewer(palette=cbPalette)+
+#  scale_fill_brewer(palette=cbPalette)+
   labs(x = "Age in years",y = "CHD count")+
-  ggtitle("Distribution of CHD with age and gender")
+  ggtitle("Distribution of CHD with age and gender")+
+  common_theme
+```
+```{r}
+d2 <- CHD %>% group_by(currentSmoker) %>% summarise(perc = mean(TenYearCHD=='1'))
+d2
+```
+```{r}
+d3 <- CHD %>% group_by(agec,factor(is_male)) %>% summarise(perc = mean(TenYearCHD=='1'))
+d3
+ggplot() + 
+geom_line(data=d3,aes(agec, perc,group =`factor(is_male)`,color =`factor(is_male)` ))+
+scale_y_continuous(labels=scales::percent)+
+labs(x='Age Group',y='Percentage',color='Gender' )+
+ggtitle("Distribution of Percentage of CHD with Age and Gender")+
+common_theme
 ```
